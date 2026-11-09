@@ -2,3 +2,5 @@ node_modules/
 .env
 data/
 uploads/
+.env.*
+!.env.example
