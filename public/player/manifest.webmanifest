@@ -1,0 +1,8 @@
+{
+  "name": "Rádio Siran Player",
+  "short_name": "Rádio",
+  "start_url": "./",
+  "display": "fullscreen",
+  "background_color": "#0f1115",
+  "theme_color": "#0f1115"
+}

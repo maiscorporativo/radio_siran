@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rádio Siran · Painel</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <!-- Login -->
+  <section id="loginView" class="login" hidden>
+    <form id="loginForm" class="card">
+      <h1>📻 Rádio Siran</h1>
+      <label>Usuário <input name="user" autocomplete="username" required></label>
+      <label>Senha <input name="password" type="password" autocomplete="current-password" required></label>
+      <button class="primary">Entrar</button>
+      <p class="err" id="loginErr"></p>
+    </form>
+  </section>
+
+  <!-- App -->
+  <section id="appView" hidden>
+    <header class="top">
+      <div class="logo">📻 Rádio Siran</div>
+      <div class="company">
+        <select id="companySel"></select>
+        <button id="newCompanyBtn" class="ghost" title="Nova empresa">+ Empresa</button>
+      </div>
+      <button id="logoutBtn" class="ghost">Sair</button>
+    </header>
+
+    <nav class="tabs" id="tabs">
+      <button data-tab="live" class="active">Ao vivo</button>
+      <button data-tab="library">Biblioteca</button>
+      <button data-tab="playlists">Playlists</button>
+      <button data-tab="campaigns">Spots</button>
+      <button data-tab="units">Unidades</button>
+      <button data-tab="report">Relatório</button>
+    </nav>
+
+    <main id="content"></main>
+  </section>
+
+  <div id="toast" hidden></div>
+  <script src="admin.js"></script>
+</body>
+</html>

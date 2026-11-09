@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rádio Siran · Player</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#0f1115">
+  <link rel="stylesheet" href="player.css">
+</head>
+<body>
+  <header>
+    <div class="brand"><span class="dot" id="netDot"></span> <span id="unitName">Rádio Siran</span></div>
+    <div id="clock">--:--</div>
+  </header>
+
+  <main>
+    <div class="label" id="nowLabel">Tocando agora</div>
+    <h1 id="nowTitle">Aguardando…</h1>
+    <div class="artist" id="nowArtist"></div>
+    <div class="bar"><div id="progress"></div></div>
+    <div class="times"><span id="tCur">0:00</span><span id="tDur">0:00</span></div>
+
+    <section class="next">
+      <div class="label">A seguir</div>
+      <div id="nextTitle">—</div>
+    </section>
+  </main>
+
+  <footer>
+    <span id="statusText">Iniciando…</span>
+    <span id="cacheText"></span>
+  </footer>
+
+  <div id="startOverlay" hidden>
+    <button id="startBtn">▶ Iniciar rádio</button>
+    <p>O navegador exige um clique para liberar o áudio.<br>Use o atalho de inicialização para dispensar este passo.</p>
+  </div>
+
+  <div id="spotifyOverlay" hidden>
+    <button id="spotifyBtn" class="spotify">Conectar Spotify</button>
+    <p>Esta unidade toca músicas do Spotify. Entre com a conta Premium uma única vez.</p>
+  </div>
+
+  <div id="errorOverlay" hidden>
+    <h2>Player não configurado</h2>
+    <p id="errorText"></p>
+  </div>
+
+  <audio id="audio" preload="auto"></audio>
+  <script src="spotify.js"></script>
+  <script src="player.js"></script>
+</body>
+</html>

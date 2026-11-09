@@ -1,0 +1,52 @@
+:root {
+  --bg: #0f1115;
+  --fg: #f2f3f5;
+  --muted: #8a909c;
+  --accent: #ff5a36;
+  --spot: #3ba7ff;
+  --ok: #2ecc71;
+  --bad: #e74c3c;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: radial-gradient(1200px 600px at 20% 0%, #1b1f27, var(--bg));
+  color: var(--fg);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  display: flex; flex-direction: column;
+  user-select: none; cursor: default;
+}
+header, footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 18px 28px; color: var(--muted); font-size: 15px;
+}
+.brand { display: flex; align-items: center; gap: 10px; color: var(--fg); font-weight: 600; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); display: inline-block; }
+.dot.on { background: var(--ok); box-shadow: 0 0 10px var(--ok); }
+.dot.off { background: var(--bad); }
+#clock { font-variant-numeric: tabular-nums; font-size: 20px; color: var(--fg); }
+main { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 0 8vw; }
+.label { text-transform: uppercase; letter-spacing: .12em; font-size: 13px; color: var(--accent); font-weight: 700; }
+body.is-spot .label#nowLabel { color: var(--spot); }
+h1 { font-size: clamp(32px, 6vw, 72px); margin: 10px 0 4px; line-height: 1.05; overflow-wrap: anywhere; }
+.artist { font-size: clamp(18px, 2.4vw, 28px); color: var(--muted); min-height: 1.2em; }
+.bar { height: 6px; background: #ffffff1a; border-radius: 3px; margin-top: 36px; overflow: hidden; }
+#progress { height: 100%; width: 0; background: var(--accent); transition: width .5s linear; }
+body.is-spot #progress { background: var(--spot); }
+.times { display: flex; justify-content: space-between; color: var(--muted); font-size: 14px; margin-top: 8px; font-variant-numeric: tabular-nums; }
+.next { margin-top: 48px; }
+#nextTitle { font-size: 20px; margin-top: 6px; color: #c9ccd3; }
+#spotifyBtn { font-size: 24px; padding: 18px 40px; border-radius: 999px; border: 0; background: #1ed760; color: #000; font-weight: 700; cursor: pointer; }
+#spotifyOverlay { position: fixed; inset: 0; background: #000d; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center; padding: 16px; gap: 16px; color: var(--muted); }
+#spotifyOverlay[hidden] { display: none; }
+#startOverlay, #errorOverlay {
+  position: fixed; inset: 0; background: #000c; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center; padding: 16px; gap: 16px; color: var(--muted);
+}
+#startOverlay[hidden], #errorOverlay[hidden] { display: none; }
+#startBtn {
+  font-size: 28px; padding: 22px 44px; border-radius: 999px; border: 0;
+  background: var(--accent); color: #fff; cursor: pointer; font-weight: 700;
+}
+#errorOverlay h2 { color: var(--fg); margin: 0; }
