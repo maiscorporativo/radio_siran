@@ -126,40 +126,14 @@
   const baseVolume = () => Math.max(0, Math.min(1, (config?.unit?.volume ?? 100) / 100));
   const spotBoost = () => Math.max(1, Math.min(3, (config?.unit?.spot_boost ?? 100) / 100));
 
-  // Reforço acima de 100% passa por Web Audio (ganho + limitador para não distorcer).
-  // Só é montado quando necessário e com o áudio já liberado pelo navegador.
-  let boostNode = null;
-  let boostBuilding = false;
-  function ensureBoostGraph() {
-    if (boostNode || boostBuilding || !window.AudioContext) return;
-    boostBuilding = true;
-    let ctx;
-    try { ctx = new AudioContext(); } catch { boostBuilding = false; return; }
-    const build = () => {
-      try {
-        const src = ctx.createMediaElementSource(audio);
-        const g = ctx.createGain();
-        const lim = ctx.createDynamicsCompressor();
-        lim.threshold.value = -2; lim.knee.value = 0; lim.ratio.value = 20;
-        lim.attack.value = 0.003; lim.release.value = 0.25;
-        src.connect(g); g.connect(lim); lim.connect(ctx.destination);
-        ctx.onstatechange = () => { if (ctx.state === 'suspended') ctx.resume().catch(() => {}); };
-        boostNode = g;
-        applyVolume();
-      } catch (e) { console.warn('Reforço de volume indisponível', e); }
-    };
-    ctx.resume().catch(() => {}).finally(() => {
-      if (ctx.state === 'running') build(); else ctx.close().catch(() => {});
-      boostBuilding = false;
-    });
-  }
+  // Spots mais altos que a música sem amplificador digital: usa a folga até 100%
+  // e, se não houver folga, abaixa a música na mesma proporção.
+  const musicVolume = () => Math.min(baseVolume(), 1 / spotBoost());
+  const spotVolume = () => Math.min(1, musicVolume() * spotBoost());
 
   const applyVolume = () => {
-    const boost = current?.media?.kind === 'spot' ? spotBoost() : 1;
-    const v = Math.max(0, baseVolume() * gain * boost);
-    if (v > 1 && !boostNode) ensureBoostGraph();
-    audio.volume = Math.min(1, v);
-    if (boostNode) boostNode.gain.value = Math.max(1, v);
+    const v = current?.media?.kind === 'spot' ? spotVolume() : musicVolume();
+    audio.volume = Math.max(0, Math.min(1, v * gain));
   };
 
   function fadeTo(target, ms = FADE_MS) {
@@ -395,7 +369,7 @@
     const from = sp.gain;
     for (let i = 1; i <= steps; i++) {
       sp.gain = from + (target - from) * (i / steps);
-      await RSpotify.setVolume(baseVolume() * sp.gain);
+      await RSpotify.setVolume(musicVolume() * sp.gain);
       await sleep(ms / steps);
     }
   }
@@ -419,7 +393,7 @@
       const pl = config.unit.spotify_playlist;
       if (!sp.started || sp.playlist !== pl) {
         sp.gain = 1;
-        await RSpotify.setVolume(baseVolume());
+        await RSpotify.setVolume(musicVolume());
         await RSpotify.start(pl, config.playlist?.shuffle ?? true);
         sp.started = true; sp.playlist = pl; sp.trackId = null;
       } else if (sp.needsNext) {
@@ -556,7 +530,7 @@
         case 'volume':
           if (config.unit) config.unit.volume = Number(c.value);
           applyVolume();
-          if (current?.source === 'spotify') RSpotify.setVolume(baseVolume() * sp.gain);
+          if (current?.source === 'spotify') RSpotify.setVolume(musicVolume() * sp.gain);
           break;
         case 'reload': saveState(); await flushAcks(); location.reload(); return;
       }
@@ -600,6 +574,7 @@
       store.set('config', config);
       $('unitName').textContent = `${data.unit.company || ''} · ${data.unit.name}`;
       applyVolume();
+      if (current?.source === 'spotify' && sp.gain === 1) Promise.resolve(RSpotify.setVolume(musicVolume())).catch(() => {});
 
       // "tocar agora" interrompe imediatamente
       const now = data.queue.find((q) => q.mode === 'now' && !takenQueue.has(q.id));
@@ -693,7 +668,6 @@
     $('startOverlay').hidden = true;
     started = true;
     RSpotify.activate(); // libera o áudio do Spotify com o clique do usuário
-    if (spotBoost() > 1) ensureBoostGraph();
     if (current && audio.src) {
       audio.play().catch(() => showStart());
     } else {
