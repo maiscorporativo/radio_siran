@@ -66,6 +66,7 @@ r.get('/sync', wrap(async (req, res) => {
   res.json({
     unit: {
       id: unit.id, name: unit.name, volume: unit.volume, company: company?.name,
+      spot_boost: unit.spot_boost ?? 100,
       music_source: unit.music_source || 'library',
       spotify_playlist: unit.spotify_playlist || null,
       spotify_client_id: process.env.SPOTIFY_CLIENT_ID || null,

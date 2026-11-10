@@ -145,6 +145,11 @@ export async function migrate() {
     });
   }
 
+  // Reforço de volume dos spots, em % do volume da música (100 = igual)
+  if (!(await db.schema.hasColumn('units', 'spot_boost'))) {
+    await db.schema.alterTable('units', (t) => { t.integer('spot_boost').defaultTo(100); });
+  }
+
   await ensureTable('play_logs', (t) => {
     t.increments('id');
     t.integer('unit_id').unsigned().notNullable().references('units.id').onDelete('CASCADE');

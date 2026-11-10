@@ -124,7 +124,43 @@
 
   // ---------- volume / fade ----------
   const baseVolume = () => Math.max(0, Math.min(1, (config?.unit?.volume ?? 100) / 100));
-  const applyVolume = () => { audio.volume = Math.max(0, Math.min(1, baseVolume() * gain)); };
+  const spotBoost = () => Math.max(1, Math.min(3, (config?.unit?.spot_boost ?? 100) / 100));
+
+  // Reforço acima de 100% passa por Web Audio (ganho + limitador para não distorcer).
+  // Só é montado quando necessário e com o áudio já liberado pelo navegador.
+  let boostNode = null;
+  let boostBuilding = false;
+  function ensureBoostGraph() {
+    if (boostNode || boostBuilding || !window.AudioContext) return;
+    boostBuilding = true;
+    let ctx;
+    try { ctx = new AudioContext(); } catch { boostBuilding = false; return; }
+    const build = () => {
+      try {
+        const src = ctx.createMediaElementSource(audio);
+        const g = ctx.createGain();
+        const lim = ctx.createDynamicsCompressor();
+        lim.threshold.value = -2; lim.knee.value = 0; lim.ratio.value = 20;
+        lim.attack.value = 0.003; lim.release.value = 0.25;
+        src.connect(g); g.connect(lim); lim.connect(ctx.destination);
+        ctx.onstatechange = () => { if (ctx.state === 'suspended') ctx.resume().catch(() => {}); };
+        boostNode = g;
+        applyVolume();
+      } catch (e) { console.warn('Reforço de volume indisponível', e); }
+    };
+    ctx.resume().catch(() => {}).finally(() => {
+      if (ctx.state === 'running') build(); else ctx.close().catch(() => {});
+      boostBuilding = false;
+    });
+  }
+
+  const applyVolume = () => {
+    const boost = current?.media?.kind === 'spot' ? spotBoost() : 1;
+    const v = Math.max(0, baseVolume() * gain * boost);
+    if (v > 1 && !boostNode) ensureBoostGraph();
+    audio.volume = Math.min(1, v);
+    if (boostNode) boostNode.gain.value = Math.max(1, v);
+  };
 
   function fadeTo(target, ms = FADE_MS) {
     return new Promise((resolve) => {
@@ -657,6 +693,7 @@
     $('startOverlay').hidden = true;
     started = true;
     RSpotify.activate(); // libera o áudio do Spotify com o clique do usuário
+    if (spotBoost() > 1) ensureBoostGraph();
     if (current && audio.src) {
       audio.play().catch(() => showStart());
     } else {

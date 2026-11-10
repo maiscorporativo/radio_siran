@@ -66,6 +66,7 @@ r.put('/units/:id', wrap(async (req, res) => {
   if (req.body.name !== undefined) patch.name = String(req.body.name).trim();
   if (req.body.playlist_id !== undefined) patch.playlist_id = req.body.playlist_id || null;
   if (req.body.volume !== undefined) patch.volume = Math.max(0, Math.min(100, Number(req.body.volume)));
+  if (req.body.spot_boost !== undefined) patch.spot_boost = Math.max(100, Math.min(300, Number(req.body.spot_boost) || 100));
   if (req.body.music_source !== undefined) patch.music_source = req.body.music_source === 'spotify' ? 'spotify' : 'library';
   if (req.body.spotify_playlist !== undefined) patch.spotify_playlist = String(req.body.spotify_playlist).trim() || null;
   await db('units').where({ id: req.params.id }).update(patch);

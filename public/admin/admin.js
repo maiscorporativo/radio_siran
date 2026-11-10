@@ -543,6 +543,9 @@
         <label ${u.music_source === 'spotify' ? 'hidden' : ''}>Playlist<select data-f="playlist_id">${plOpts(u.playlist_id)}</select></label>
         <label ${u.music_source === 'spotify' ? '' : 'hidden'}>Link da playlist do Spotify
           <input data-f="spotify_playlist" value="${esc(u.spotify_playlist || '')}" placeholder="https://open.spotify.com/playlist/..."></label>
+        <label>Volume dos spots<select data-f="spot_boost">
+          ${[[100, 'Igual à música'], [125, '+25% mais alto'], [150, '+50% mais alto'], [175, '+75% mais alto'], [200, '+100% (dobro)'], [250, '+150%'], [300, '+200% (triplo)']]
+            .map(([v, t]) => `<option value="${v}" ${Number(u.spot_boost ?? 100) === v ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
         <div><div class="muted" style="font-size:13px;margin-bottom:4px">Link do player (abrir no notebook da unidade)</div>
           <code class="link">${esc(link(u))}</code></div>
         <div class="row">
