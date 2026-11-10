@@ -124,6 +124,8 @@
 
   // ---------- volume / fade ----------
   const baseVolume = () => Math.max(0, Math.min(1, (config?.unit?.volume ?? 100) / 100));
+  const PLAYER_VERSION = '2026-11-10.2';
+  let lastSpotInfo = null;
   const spotBoost = () => Math.max(1, Math.min(3, (config?.unit?.spot_boost ?? 100) / 100));
 
   // Spots mais altos que a música sem amplificador digital: usa a folga até 100%
@@ -311,10 +313,15 @@
     audio.src = src;
     if (old.startsWith('blob:')) URL.revokeObjectURL(old);
     if (item.resumeAt) audio.currentTime = item.resumeAt;
-    gain = 1; applyVolume();
+    gain = 1; audio.muted = false; applyVolume();
 
     try {
       if (!paused) await audio.play();
+      if (item.media.kind === 'spot') {
+        setTimeout(() => {
+          if (current === item) lastSpotInfo = { title: item.media.title, vol: Math.round(audio.volume * 100), muted: audio.muted, t: Math.round(audio.currentTime), paused: audio.paused };
+        }, 2000);
+      }
     } catch (e) {
       if (e.name === 'NotAllowedError') { showStart(); return; }
       console.warn(e);
@@ -605,6 +612,8 @@
       } : null,
       next: peekNextTitle(),
       cache: $('cacheText').textContent,
+      v: PLAYER_VERSION,
+      audio: { vol: Math.round(audio.volume * 100), muted: audio.muted, music: Math.round(musicVolume() * 100), spot: Math.round(spotVolume() * 100), lastSpot: lastSpotInfo },
       at: Date.now(),
     };
     try {
